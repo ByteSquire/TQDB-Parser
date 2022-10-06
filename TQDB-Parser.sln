@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.32916.344
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TQDB-Parser", "TQDB-Parser.csproj", "{CAAC0F8C-2B25-4F82-937B-A825125A4747}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParserTest", "..\ParserTest\ParserTest.csproj", "{DE61AC5E-F4B0-4697-A519-CA5F24828D7C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CAAC0F8C-2B25-4F82-937B-A825125A4747}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CAAC0F8C-2B25-4F82-937B-A825125A4747}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CAAC0F8C-2B25-4F82-937B-A825125A4747}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CAAC0F8C-2B25-4F82-937B-A825125A4747}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DE61AC5E-F4B0-4697-A519-CA5F24828D7C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DE61AC5E-F4B0-4697-A519-CA5F24828D7C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DE61AC5E-F4B0-4697-A519-CA5F24828D7C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DE61AC5E-F4B0-4697-A519-CA5F24828D7C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6E26D422-9A9D-4098-9EB5-BD2D7D17DD28}
+	EndGlobalSection
+EndGlobal
