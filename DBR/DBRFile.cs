@@ -56,13 +56,18 @@ namespace TQDB_Parser.DBR
 
         public void UpdateEntry(string key, string newValue)
         {
-            if (!entries.ContainsKey(key))
-                LogException.LogAndThrowException(logger, new KeyNotFoundException($"The given key {key} does not exist in template {TemplateRoot.FileName}"), this);
-
-            entries[key].UpdateValue(newValue);
+            this[key].UpdateValue(newValue);
         }
 
-        public DBREntry this[string key] => entries[key];
+        public DBREntry this[string key]
+        {
+            get
+            {
+                if (!entries.ContainsKey(key))
+                    LogException.LogAndThrowException(logger, new KeyNotFoundException($"The given key {key} does not exist in template {TemplateRoot.FileName}"), this);
+                return entries[key];
+            }
+        }
 
         public IReadOnlyList<DBREntry> this[GroupBlock group]
         {
