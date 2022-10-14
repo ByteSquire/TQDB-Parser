@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
+using System.Reflection.PortableExecutable;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -15,7 +16,6 @@ namespace TQDB_Parser
     {
         private readonly string baseDir;
         private string filePath;
-        private StreamReader? reader;
         private int lineIndex;
         private readonly Stack<int> openCurlyBrackets;
         private readonly ILogger? logger;
@@ -50,9 +50,9 @@ namespace TQDB_Parser
             if (string.IsNullOrEmpty(File.ReadAllText(filePath)))
                 LogException.LogAndThrowException(logger, new ParseException(this.filePath, info: $"file is empty"), this);
 
-            reader = new StreamReader(filePath);
+            using var reader = new StreamReader(filePath);
             lineIndex = 0;
-            var root = ParseTemplateRootGroup();
+            var root = ParseTemplateRootGroup(reader);
 
             if (openCurlyBrackets.Count > 0)
             {
@@ -73,21 +73,16 @@ namespace TQDB_Parser
             return root;
         }
 
-        ~TemplateParser()
-        {
-            reader?.Close();
-        }
-
         private void CheckLine(string expected, string? actual)
         {
             if (!expected.Equals(actual))
                 LogException.LogAndThrowException(logger, new ParseException(filePath, lineIndex, $"expected {expected} but was {actual}"), this);
         }
 
-        private string? ReadLine()
+        private string? ReadLine(StreamReader reader)
         {
             lineIndex++;
-            var line = reader?.ReadLine()?.Trim();
+            var line = reader.ReadLine()?.Trim();
             if (line is null)
                 return null;
 
@@ -112,13 +107,13 @@ namespace TQDB_Parser
             return line.Trim();
         }
 
-        private GroupBlock ParseTemplateRootGroup()
+        private GroupBlock ParseTemplateRootGroup(StreamReader reader)
         {
             // Templates have to start with a Group block
-            var line = ReadLine();
+            var line = ReadLine(reader);
             CheckLine("Group", line);
 
-            return ParseGroupBlock();
+            return ParseGroupBlock(reader);
         }
 
         public enum BlockType : byte
@@ -127,24 +122,24 @@ namespace TQDB_Parser
             Variable
         }
 
-        private GroupBlock ParseGroupBlock()
+        private GroupBlock ParseGroupBlock(StreamReader reader)
         {
-            (var blockStart, var innerBlocks, var keyValuePairs) = ParseBlock();
+            (var blockStart, var innerBlocks, var keyValuePairs) = ParseBlock(reader);
             return new GroupBlock(filePath, blockStart, keyValuePairs, innerBlocks, logger);
         }
 
-        private VariableBlock ParseVariableBlock()
+        private VariableBlock ParseVariableBlock(StreamReader reader)
         {
-            (var blockStart, var innerBlocks, var keyValuePairs) = ParseBlock();
+            (var blockStart, var innerBlocks, var keyValuePairs) = ParseBlock(reader);
             return new VariableBlock(filePath, blockStart, keyValuePairs, innerBlocks, logger);
         }
 
-        private (int, IReadOnlyList<Block>, IReadOnlyDictionary<string, string>) ParseBlock()
+        private (int, IReadOnlyList<Block>, IReadOnlyDictionary<string, string>) ParseBlock(StreamReader reader)
         {
             var blockStart = lineIndex;
-            var line = ReadLine();
+            var line = ReadLine(reader);
             CheckLine("{", line);
-            line = ReadLine();
+            line = ReadLine(reader);
 
             var innerBlocks = new List<Block>();
             var keyValuePairs = new Dictionary<string, string>();
@@ -152,19 +147,19 @@ namespace TQDB_Parser
             {
                 if (string.IsNullOrEmpty(line))
                 {
-                    line = ReadLine();
+                    line = ReadLine(reader);
                     continue;
                 }
                 if ("Group".Equals(line))
                 {
-                    innerBlocks.Add(ParseGroupBlock());
-                    line = ReadLine();
+                    innerBlocks.Add(ParseGroupBlock(reader));
+                    line = ReadLine(reader);
                     continue;
                 }
                 if ("Variable".Equals(line))
                 {
-                    innerBlocks.Add(ParseVariableBlock());
-                    line = ReadLine();
+                    innerBlocks.Add(ParseVariableBlock(reader));
+                    line = ReadLine(reader);
                     continue;
                 }
                 var regex = new Regex(@"""[^""]*""|(=)");
@@ -178,7 +173,7 @@ namespace TQDB_Parser
                 var value = line[equalsMatches[1].Index..].Trim().Trim('"');
 
                 keyValuePairs.Add(key, value);
-                line = ReadLine();
+                line = ReadLine(reader);
             }
 
             return (blockStart, innerBlocks, keyValuePairs);
