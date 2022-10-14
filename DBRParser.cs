@@ -117,7 +117,15 @@ namespace TQDB_Parser
 
             var concurrentDict = new ConcurrentDictionary<string, DBREntry>();
 
-            Parallel.ForEach(rawEntries, x =>
+            if (manager.UseParallel)
+                Parallel.ForEach(rawEntries, x => ParseEntry(x));
+            else
+                foreach (var x in rawEntries)
+                    ParseEntry(x);
+
+            return concurrentDict;
+
+            void ParseEntry(KeyValuePair<string, string> x)
             {
                 try
                 {
@@ -132,9 +140,7 @@ namespace TQDB_Parser
                 {
                     logger?.LogWarning("File {filePath}, unexpected variable {key}", filePath, x.Key);
                 }
-            });
-
-            return concurrentDict;
+            }
         }
     }
 }

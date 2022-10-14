@@ -17,9 +17,12 @@ namespace TQDB_Parser
 
         public string TemplateBaseDir { get; private set; }
 
-        public TemplateManager(string baseDir, ILogger? logger = null)
+        public bool UseParallel { get; private set; }
+
+        public TemplateManager(string baseDir, bool useParallel = true, ILogger? logger = null)
         {
             this.logger = logger;
+            UseParallel = useParallel;
             if (!Directory.Exists(baseDir))
                 LogException.LogAndThrowException(logger, new DirectoryNotFoundException($"The specified directory {baseDir} could not be found!"), this);
             TemplateBaseDir = baseDir;
@@ -72,11 +75,11 @@ namespace TQDB_Parser
 
             var concurrentDict = new ConcurrentDictionary<string, GroupBlock>();
 
-            Parallel.ForEach(entries, entry =>
-            {
-                var relativePath = entry[(TemplateBaseDir.Length + 1)..];
-                concurrentDict.TryAdd(relativePath, new TemplateParser(TemplateBaseDir).ParseFile(relativePath));
-            });
+            if (UseParallel)
+                Parallel.ForEach(entries, entry => AddEntry(entry));
+            else
+                foreach (var entry in entries)
+                    AddEntry(entry);
 
             foreach (var pair in concurrentDict)
             {
@@ -95,6 +98,12 @@ namespace TQDB_Parser
             //    var relativePath = entry[(templateBaseDir.Length + 1)..];
             //    templateRootsByPath.Add(relativePath, parser.ParseFile(relativePath));
             //}
+
+            void AddEntry(string entry)
+            {
+                var relativePath = entry[(TemplateBaseDir.Length + 1)..];
+                concurrentDict.TryAdd(relativePath, new TemplateParser(TemplateBaseDir).ParseFile(relativePath));
+            }
         }
 
         public IReadOnlyCollection<GroupBlock> ParseAllTemplates(bool overwriteCache = false)
