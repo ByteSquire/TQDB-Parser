@@ -47,6 +47,9 @@ namespace TQDB_Parser
 
         public DBRFile ChangeFileTemplate(DBRFile file, string templateName)
         {
+            if (file.TemplateRoot.FileName == templateName)
+                return file;
+
             var path = file.FilePath;
             var rawEntries = file.Entries.ToDictionary(x => x.Name, x => x.Value);
             try
