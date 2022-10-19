@@ -56,15 +56,33 @@ namespace TQDB_Parser
                 ResolveIncludes(root);
         }
 
-        public GroupBlock GetRoot(string templatePath)
+        public string GetTemplateName(string filePath)
+        {
+            string templateName = Path.GetRelativePath(TemplateBaseDir, filePath);
+
+            FixTemplateName(ref templateName);
+
+            return templateName;
+        }
+
+        private void FixTemplateName(ref string templateName)
         {
             // hack to be able to parse templates that someone saved with their path
-            if (templatePath.StartsWith("Custommaps\\Art_TQX3\\") && !Directory.Exists(Path.Combine(TemplateBaseDir, "Custommaps\\Art_TQX3")))
-                templatePath = templatePath["Custommaps\\Art_TQX3\\".Length..];
-            if (templateRootsByPath.TryGetValue(templatePath, out var root))
+            if (templateName.StartsWith("Custommaps\\Art_TQX3\\") && !Directory.Exists(Path.Combine(TemplateBaseDir, "Custommaps\\Art_TQX3")))
+                templateName = templateName["Custommaps\\Art_TQX3\\".Length..];
+
+            // including hack to ignore %TEMPLATE_DIR%, don't know how that is resolved (probably env variable)
+            if (templateName.StartsWith("%TEMPLATE_DIR%"))
+                templateName = templateName["%TEMPLATE_DIR%".Length..];
+        }
+
+        public GroupBlock GetRoot(string templateName)
+        {
+            FixTemplateName(ref templateName);
+            if (templateRootsByPath.TryGetValue(templateName, out var root))
                 return root;
             else
-                return ParseTemplate(templatePath);
+                return ParseTemplate(templateName);
         }
 
         private IReadOnlyCollection<GroupBlock> ParseTemplatesInDir(string path, bool recursive, bool overwriteCache)

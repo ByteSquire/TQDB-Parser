@@ -47,8 +47,7 @@ namespace TQDB_Parser.Blocks
 
             foreach (var includeBlockRef in includeBlocks)
             {
-                // including hack to ignore %TEMPLATE_DIR%, don't know how that is resolved
-                var includeBlock = manager.GetRoot(includeBlockRef.DefaultValue.Replace("%TEMPLATE_DIR%", string.Empty));
+                var includeBlock = manager.GetRoot(includeBlockRef.DefaultValue);
                 includeBlock.ResolveIncludes(manager);
                 // ignore header from included templates
                 includeBlock.InnerBlocks = includeBlock.InnerBlocks.WhereType<GroupBlock>().Where(x => !(x.Name == "Header" && x.Type == GroupType.@system)).ToList();
