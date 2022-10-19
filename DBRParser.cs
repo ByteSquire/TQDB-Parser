@@ -45,6 +45,22 @@ namespace TQDB_Parser
             }
         }
 
+        public DBRFile ChangeFileTemplate(DBRFile file, string templateName)
+        {
+            var path = file.FilePath;
+            var rawEntries = file.Entries.ToDictionary(x => x.Name, x => x.Value);
+            try
+            {
+                var templateRoot = manager.GetRoot(templateName);
+                return new DBRFile(path, templateRoot, ParseEntries(path, templateRoot, rawEntries));
+            }
+            catch (Exception exc)
+            {
+                logger?.LogError(exc, "File {path}, could not parse template file {templateName}, reason:\n{message}", path, templateName, exc.Message);
+                throw;
+            }
+        }
+
         private (string, IReadOnlyDictionary<string, string>) ParseRawEntries(string filePath)
         {
             var ret = new Dictionary<string, string>();
