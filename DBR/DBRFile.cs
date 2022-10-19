@@ -19,6 +19,9 @@ namespace TQDB_Parser.DBR
 
         public GroupBlock TemplateRoot { get; private set; }
 
+        public string FileName { get; private set; }
+        public string FilePath => path;
+
         public IReadOnlyList<DBREntry> Entries => entries.Values.ToList();
 
         //public DBRFile(string path, TemplateManager manager)
@@ -37,6 +40,7 @@ namespace TQDB_Parser.DBR
         public DBRFile(string path, GroupBlock templateRoot, ILogger? logger = null)
         {
             this.path = path;
+            FileName = Path.GetFileName(path);
             this.logger = logger;
             TemplateRoot = templateRoot;
             templateName = templateRoot.FileName;
@@ -48,6 +52,7 @@ namespace TQDB_Parser.DBR
         public DBRFile(string path, GroupBlock templateRoot, IReadOnlyDictionary<string, DBREntry> entries, ILogger? logger = null)
         {
             this.path = path;
+            FileName = Path.GetFileName(path);
             this.logger = logger;
             TemplateRoot = templateRoot;
             templateName = templateRoot.FileName;
@@ -104,7 +109,7 @@ namespace TQDB_Parser.DBR
             return builder.ToString();
         }
 
-        public void SafeFile(string? saveAs = null, Encoding? encoding = null)
+        public void SaveFile(string? saveAs = null, Encoding? encoding = null)
         {
             encoding ??= Encoding.UTF8;
             File.WriteAllText(saveAs ?? path, ToString(), encoding);
