@@ -71,7 +71,7 @@ namespace TQDB_Parser
         {
             var entries = Directory.EnumerateFiles(path, "*.tpl", recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
 
-            var partitioner = Partitioner.Create(entries);
+            //var partitioner = Partitioner.Create(entries);
 
             var concurrentDict = new ConcurrentDictionary<string, GroupBlock>();
 
@@ -101,7 +101,7 @@ namespace TQDB_Parser
 
             void AddEntry(string entry)
             {
-                var relativePath = entry[(TemplateBaseDir.Length + 1)..];
+                var relativePath = Path.GetRelativePath(TemplateBaseDir, entry);
                 concurrentDict.TryAdd(relativePath, new TemplateParser(TemplateBaseDir).ParseFile(relativePath));
             }
         }
