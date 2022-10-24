@@ -57,6 +57,8 @@ namespace TQDB_Parser.DBR
             TemplateRoot = templateRoot;
             templateName = templateRoot.FileName;
             this.entries = new(entries);
+
+            GenerateDefaultEntries();
         }
 
         public void UpdateEntry(string key, string newValue)
@@ -69,7 +71,7 @@ namespace TQDB_Parser.DBR
             get
             {
                 if (!entries.ContainsKey(key))
-                    LogException.LogAndThrowException(logger, new KeyNotFoundException($"The given key {key} does not exist in template {TemplateRoot.FileName}"), this);
+                    LogException.LogAndThrowException(logger, new KeyNotFoundException($"The given key {key} does not exist in file {FilePath}"), this);
                 return entries[key];
             }
         }
@@ -94,7 +96,7 @@ namespace TQDB_Parser.DBR
         {
             var variables = TemplateRoot.GetVariables(true);
             foreach (var variable in variables)
-                entries.Add(variable.Name, new DBREntry(variable));
+                entries.TryAdd(variable.Name, new DBREntry(variable));
         }
 
         public override string ToString()
