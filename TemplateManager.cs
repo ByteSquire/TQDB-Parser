@@ -79,7 +79,8 @@ namespace TQDB_Parser
         public GroupBlock GetRoot(string templateName)
         {
             FixTemplateName(ref templateName);
-            if (templateRootsByPath.TryGetValue(templateName, out var root))
+
+            if (templateRootsByPath.TryGetValue(templateName.ToLower(), out var root))
                 return root;
             else
                 return ParseTemplate(templateName);
@@ -101,12 +102,13 @@ namespace TQDB_Parser
 
             foreach (var pair in concurrentDict)
             {
-                if (templateRootsByPath.TryGetValue(pair.Key, out var value))
+                var key = pair.Key.ToLower();
+                if (templateRootsByPath.TryGetValue(key, out var value))
                 {
                     if (!overwriteCache)
-                        concurrentDict[pair.Key] = value;
+                        concurrentDict[key] = value;
                 }
-                templateRootsByPath[pair.Key] = pair.Value;
+                templateRootsByPath[key] = pair.Value;
             }
 
             return (IReadOnlyCollection<GroupBlock>)concurrentDict.Values;
@@ -131,12 +133,12 @@ namespace TQDB_Parser
 
         public GroupBlock ParseTemplate(string path, bool overwriteCache = false)
         {
-            if (templateRootsByPath.TryGetValue(path, out var block))
+            if (templateRootsByPath.TryGetValue(path.ToLower(), out var block))
             {
                 if (overwriteCache)
                 {
                     block = new TemplateParser(TemplateBaseDir).ParseFile(path);
-                    templateRootsByPath[path] = block;
+                    templateRootsByPath[path.ToLower()] = block;
                     return block;
                 }
                 else
@@ -145,7 +147,7 @@ namespace TQDB_Parser
             else
             {
                 block = new TemplateParser(TemplateBaseDir).ParseFile(path);
-                templateRootsByPath.Add(path, block);
+                templateRootsByPath.Add(path.ToLower(), block);
                 return block;
             }
         }
