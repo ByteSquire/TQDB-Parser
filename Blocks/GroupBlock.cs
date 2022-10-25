@@ -57,12 +57,22 @@ namespace TQDB_Parser.Blocks
                 MergeGroups(includeBlock);
             }
             foreach (var inner in InnerBlocks.WhereType<GroupBlock>())
+            {
                 inner.ResolveIncludes(manager);
+                if (!inner.includeBlocks.Any())
+                    // do this explicitly because inner block has no includes
+                    inner.UpdateFilteredBlocks();
+            }
 
             // Remove include blocks, they are now resolved
             InnerBlocks = InnerBlocks.Except(includeBlocks).ToList();
             includeBlocks.Clear();
 
+            UpdateFilteredBlocks();
+        }
+
+        private void UpdateFilteredBlocks()
+        {
             // update filtered blocks
             groupBlocks = InnerBlocks.WhereType<GroupBlock>().ToList();
             recursedGroupBlocks = groupBlocks.Concat(groupBlocks.SelectMany(x => x.GetGroups(true))).ToList();
@@ -127,7 +137,7 @@ namespace TQDB_Parser.Blocks
 
             foreach (var groupToMerge in groupsToMerge)
             {
-                groupToMerge.a.MergeGroups(groupToMerge.b);
+                groupToMerge.b.MergeGroups(groupToMerge.a);
             }
 
             // Add additional blocks to this group
