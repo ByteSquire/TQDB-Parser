@@ -80,7 +80,7 @@ namespace TQDB_Parser.DBR
         {
             get
             {
-                if (!TemplateRoot.IsChild(group, true))
+                if (!TemplateRoot.IsChild(group, true) && !TemplateRoot.Equals(group))
                     LogException.LogAndThrowException(logger, new ArgumentException($"The passed group {group.Name} is not part of template {TemplateRoot.FileName}"), this);
 
                 var ret = new List<DBREntry>();
