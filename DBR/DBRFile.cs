@@ -86,7 +86,11 @@ namespace TQDB_Parser.DBR
                 var ret = new List<DBREntry>();
 
                 foreach (var variable in group.GetVariables())
-                    ret.Add(this[variable.Name]);
+                    // workaround because eqnVariables all have the same name and they use their default value anyway
+                    if (variable.Type == VariableType.eqnVariable)
+                        ret.Add(new DBREntry(variable));
+                    else
+                        ret.Add(this[variable.Name]);
 
                 return ret;
             }
@@ -96,7 +100,9 @@ namespace TQDB_Parser.DBR
         {
             var variables = TemplateRoot.GetVariables(true);
             foreach (var variable in variables)
-                entries.TryAdd(variable.Name, new DBREntry(variable));
+                // workaround because eqnVariables all have the same name and they use their default value anyway
+                if (variable.Type != VariableType.eqnVariable)
+                    entries.TryAdd(variable.Name, new DBREntry(variable));
         }
 
         public override string ToString()
