@@ -122,7 +122,7 @@ namespace TQDB_Parser
             void AddEntry(string entry)
             {
                 var relativePath = Path.GetRelativePath(TemplateBaseDir, entry);
-                concurrentDict.TryAdd(relativePath, new TemplateParser(TemplateBaseDir).ParseFile(relativePath));
+                concurrentDict.TryAdd(relativePath, new TemplateParser(TemplateBaseDir, logger).ParseFile(relativePath));
             }
         }
 
@@ -137,7 +137,7 @@ namespace TQDB_Parser
             {
                 if (overwriteCache)
                 {
-                    block = new TemplateParser(TemplateBaseDir).ParseFile(path);
+                    block = new TemplateParser(TemplateBaseDir, logger).ParseFile(path);
                     templateRootsByPath[path.ToLower()] = block;
                     return block;
                 }
@@ -146,7 +146,7 @@ namespace TQDB_Parser
             }
             else
             {
-                block = new TemplateParser(TemplateBaseDir).ParseFile(path);
+                block = new TemplateParser(TemplateBaseDir, logger).ParseFile(path);
                 templateRootsByPath.Add(path.ToLower(), block);
                 return block;
             }
