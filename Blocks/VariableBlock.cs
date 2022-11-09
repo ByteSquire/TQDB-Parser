@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TQDB_Parser.Extensions;
 
 namespace TQDB_Parser.Blocks
 {
@@ -116,9 +117,10 @@ namespace TQDB_Parser.Blocks
             return string.IsNullOrEmpty(Value) ? DefaultValue : Value;
         }
 
-        public bool ValidateValue(string value, out int arrayIndex)
+        public bool ValidateValue(string value, out IReadOnlyList<int> invalidIndices)
         {
-            arrayIndex = -1;
+            var invalidIdx = new List<int>();
+            invalidIndices = invalidIdx;
             if (string.IsNullOrEmpty(value))
                 return true;
 
@@ -130,23 +132,27 @@ namespace TQDB_Parser.Blocks
                 for (int i = 0; i < values.Length; i++)
                 {
                     var element = values[i];
-                    if (!ValidateValueInternal(element))
+                    if (!ValidateValueInternal(element, invalidIdx))
                     {
+                        // Maybe support having indices inside array elements, haven't see arrays of equations yet
+                        invalidIdx.Clear();
                         logger?.LogWarning("The given value {element} at index {index} is invalid!", element, i);
-                        arrayIndex = i;
-                        return false;
+                        invalidIdx.Add(i);
                     }
                 }
+
+                if (invalidIdx.Count > 0)
+                    return false;
             }
             else
             {
-                ret = ValidateValueInternal(value);
+                ret = ValidateValueInternal(value, invalidIdx);
             }
 
             return ret;
         }
 
-        private bool ValidateValueInternal(string value)
+        private bool ValidateValueInternal(string value, IList<int> invalidIndices)
         {
             switch (Type)
             {
@@ -155,9 +161,9 @@ namespace TQDB_Parser.Blocks
                     return true;
 
                 case VariableType.real:
-                    return float.TryParse(value, out var _);
+                    return TQNumberString.TryParseTQString(value, out float _);
                 case VariableType.@int:
-                    return int.TryParse(value, out var _);
+                    return TQNumberString.TryParseTQString(value, out int _);
                 case VariableType.@bool:
                     return value == "0" || value == "1";
 
@@ -174,23 +180,29 @@ namespace TQDB_Parser.Blocks
                     return true;
                 case VariableType.equation:
                     var validChars = new char[] { '(', ')', '.', '+', '-', '*', '/', '^' };
-                    var bracketStack = new Stack<byte>();
+                    var bracketStack = new Stack<int>();
 
-                    foreach (var character in value)
+                    for (var i = 0; i < value.Length; i++)
                     {
+                        var character = value[i];
                         if (char.IsWhiteSpace(character))
                             continue;
                         if (char.IsLetterOrDigit(character))
                             continue;
                         if (!validChars.Contains(character))
-                            return false;
+                            invalidIndices.Add(i);
                         if (character == '(')
-                            bracketStack.Push(0);
+                            bracketStack.Push(i);
                         if (character == ')')
                             if (!bracketStack.TryPop(out var _))
-                                return false;
+                                invalidIndices.Add(i);
                     }
                     if (bracketStack.Count > 0)
+                    {
+                        foreach (var pos in bracketStack)
+                            invalidIndices.Add(pos);
+                    }
+                    if (invalidIndices.Count > 0)
                         return false;
                     return true;
                 default:

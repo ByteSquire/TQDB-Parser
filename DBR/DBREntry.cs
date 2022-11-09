@@ -11,7 +11,7 @@ namespace TQDB_Parser.DBR
     {
         private bool isValid;
 
-        public int InvalidIndex { get; private set; }
+        public IReadOnlyList<int> InvalidIndices { get; private set; }
 
         public VariableBlock Template { get; private set; }
 
@@ -24,15 +24,15 @@ namespace TQDB_Parser.DBR
             Template = template;
 
             Value = value ?? template.GetDefaultValue();
-            if (!(isValid = Template.ValidateValue(Value, out var index)))
-                InvalidIndex = index;
+            if (!(isValid = Template.ValidateValue(Value, out var indices)))
+                InvalidIndices = indices;
         }
 
         public void UpdateValue(string value)
         {
             Value = value;
-            if (!(isValid = Template.ValidateValue(Value, out var index)))
-                InvalidIndex = index;
+            if (!(isValid = Template.ValidateValue(Value, out var indices)))
+                InvalidIndices = indices;
         }
 
         public bool IsValid()
