@@ -8,7 +8,7 @@
 		<Authors>ByteSquire</Authors>
 		<Company>ByteSquire.tq</Company>
 		<Product>TQDB-Parser</Product>
-		<Version>1.2.3</Version>
+		<Version>1.2.4</Version>
 		<PackageId>$(Company).$(Product)</PackageId>
 	</PropertyGroup>
 
