@@ -89,7 +89,8 @@ namespace TQDB_Parser
                     if (key == Constants.FileNameHistoryKey)
                         continue;
 
-                    ret.Add(key, value);
+                    if (!ret.TryAdd(key, value))
+                        logger?.LogWarning("File {filePath} in line {line}, variable {key} has already been defined", filePath, parser.LineNumber, key);
                 }
                 catch (MalformedLineException exc)
                 {
