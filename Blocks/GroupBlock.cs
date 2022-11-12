@@ -50,11 +50,16 @@ namespace TQDB_Parser.Blocks
                 var includeBlock = manager.GetRoot(includeBlockRef.DefaultValue);
                 includeBlock.ResolveIncludes(manager);
                 // ignore header from included templates
-                includeBlock.InnerBlocks = includeBlock.InnerBlocks.WhereType<GroupBlock>().Where(x => !(x.Name == "Header" && x.Type == GroupType.@system)).ToList();
+                var blocksToMerge = includeBlock.InnerBlocks.WhereType<GroupBlock>().Where(x => !(x.Name == "Header" && x.Type == GroupType.@system)).ToList();
                 //foreach (var inner in includeBlock.InnerBlocks.WhereType(x => (GroupBlock)x))
                 //    inner.ResolveIncludes(manager);
 
-                MergeGroups(includeBlock);
+                var blockToMerge = new GroupBlock(includeBlock.FileName,
+                    includeBlock.Line,
+                    includeBlock.KeyValuePairs,
+                    blocksToMerge,
+                    includeBlock.logger);
+                InnerBlocks = MergeBlocks(blockToMerge);
             }
             foreach (var inner in InnerBlocks.WhereType<GroupBlock>())
             {
@@ -132,25 +137,55 @@ namespace TQDB_Parser.Blocks
                 return variableBlocks.Contains(other);
         }
 
-        protected void MergeGroups(GroupBlock other)
+        protected IReadOnlyList<Block> MergeBlocks(GroupBlock other)
         {
-            if (Type != other.Type)
-                LogException.LogAndThrowException(logger, new MergeException($"Trying to merge different block types {Type} and {other.Type}"), this);
+            //if (Type != other.Type)
+            //    LogException.LogAndThrowException(logger, new MergeException($"Trying to merge different block types {Type} and {other.Type}"), this);
 
             var conflictingBlocks = other.InnerBlocks.Intersect(InnerBlocks, new BlockMetaComparer());
             var filteredBlocks = other.InnerBlocks.Except(conflictingBlocks);
             var groupsToMerge = conflictingBlocks
                 .WhereType<GroupBlock>()
-                .GroupJoin(InnerBlocks.WhereType<GroupBlock>(), x => x, y => y, (a, b)
-                => new { a, b = b.Single() }, new BlockMetaComparer());
+                .GroupJoin(InnerBlocks.WhereType<GroupBlock>(), x => x, y => y,
+                (a, b) => new { a, b = b.Single() }, new BlockMetaComparer());
 
-            foreach (var groupToMerge in groupsToMerge)
+            var newBlocks = new List<Block>();
+
+            var needMerging = groupsToMerge.Count();
+            // Replace merged groups
+            foreach (var innerBlock in InnerBlocks)
             {
-                groupToMerge.b.MergeGroups(groupToMerge.a);
+                if (needMerging > 0 && groupsToMerge.Any(x => x.b.Equals(innerBlock)))
+                {
+                    try
+                    {
+                        var groupToMerge = groupsToMerge.Single(x => x.b.Equals(innerBlock));
+
+                        // brackets might be useful but it's easy enough to know that two are merged
+                        var mergedFileName = /*'(' +*/ innerBlock.FileName + '|' + other.FileName /*+ ')'*/;
+                        var mergedLine = /*'(' +*/ innerBlock.Line + '|' + other.Line /*+ ')'*/;
+
+                        var tmpBlock = new GroupBlock(
+                            mergedFileName,
+                            mergedLine,
+                            innerBlock.KeyValuePairs,
+                            groupToMerge.b.MergeBlocks(groupToMerge.a),
+                            logger);
+                        newBlocks.Add(tmpBlock);
+
+                        needMerging--;
+                        continue;
+                    }
+                    catch (InvalidOperationException) { }
+                }
+
+                newBlocks.Add(innerBlock);
             }
 
-            // Add additional blocks to this group
-            InnerBlocks = InnerBlocks.Concat(filteredBlocks).ToImmutableList();
+            // Add additional blocks to group
+            newBlocks.AddRange(filteredBlocks);
+
+            return newBlocks;
         }
 
         protected override string BlockName => "Group";
