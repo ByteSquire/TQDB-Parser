@@ -76,7 +76,7 @@ namespace TQDB_Parser
         private void CheckLine(string expected, string? actual)
         {
             if (!expected.Equals(actual))
-                LogException.LogAndThrowException(logger, new ParseException(filePath, lineIndex, $"expected {expected} but was {actual}"), this);
+                LogException.LogAndThrowException(logger, new ParseException(filePath, lineIndex.ToString(), $"expected {expected} but was {actual}"), this);
         }
 
         private string? ReadLine(StreamReader reader)
@@ -101,7 +101,7 @@ namespace TQDB_Parser
             foreach (var match in closeMatches.AsEnumerable())
             {
                 if (match.Groups[0].Success && !openCurlyBrackets.TryPop(out var _))
-                    LogException.LogAndThrowException(logger, new ParseException(filePath, lineIndex, $"expected a maximum of {remainingOpenCurlyBrackets} }} but was {line}"), this);
+                    LogException.LogAndThrowException(logger, new ParseException(filePath, lineIndex.ToString(), $"expected a maximum of {remainingOpenCurlyBrackets} }} but was {line}"), this);
             }
 
             return line.Trim();
@@ -125,13 +125,13 @@ namespace TQDB_Parser
         private GroupBlock ParseGroupBlock(StreamReader reader)
         {
             (var blockStart, var innerBlocks, var keyValuePairs) = ParseBlock(reader);
-            return new GroupBlock(filePath, blockStart, keyValuePairs, innerBlocks, logger);
+            return new GroupBlock(filePath, blockStart.ToString(), keyValuePairs, innerBlocks, logger);
         }
 
         private VariableBlock ParseVariableBlock(StreamReader reader)
         {
             (var blockStart, var innerBlocks, var keyValuePairs) = ParseBlock(reader);
-            return new VariableBlock(filePath, blockStart, keyValuePairs, innerBlocks, logger);
+            return new VariableBlock(filePath, blockStart.ToString(), keyValuePairs, innerBlocks, logger);
         }
 
         private (int, IReadOnlyList<Block>, IReadOnlyDictionary<string, string>) ParseBlock(StreamReader reader)

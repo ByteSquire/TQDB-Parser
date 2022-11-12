@@ -18,7 +18,7 @@ namespace TQDB_Parser.Blocks
 
         public string FileName { get; private set; }
 
-        public int Line { get; private set; }
+        public string Line { get; private set; }
 
         public string Name { get; private set; }
 
@@ -28,7 +28,7 @@ namespace TQDB_Parser.Blocks
 
         public IReadOnlyList<Block> InnerBlocks { get; protected set; }
 
-        public Block(string fileName, int lineIndex, IReadOnlyDictionary<string, string> keyValuePairs, IReadOnlyList<Block> innerBlocks, ILogger? logger = null)
+        public Block(string fileName, string lineIndex, IReadOnlyDictionary<string, string> keyValuePairs, IReadOnlyList<Block> innerBlocks, ILogger? logger = null)
         {
             FileName = fileName;
             Line = lineIndex;

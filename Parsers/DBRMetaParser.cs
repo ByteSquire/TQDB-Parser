@@ -40,7 +40,7 @@ namespace TQDB_Parser.DBRMeta
                 {
                     var split = line.Split(',');
                     if (split.Length != 3)
-                        LogException.LogAndThrowException(logger, new ParseException(filePath, i + 1, info: "templateName contains invalid character , !"), caller: typeof(DBRMetaParser));
+                        LogException.LogAndThrowException(logger, new ParseException(filePath, (i + 1).ToString(), info: "templateName contains invalid character , !"), caller: typeof(DBRMetaParser));
                     template = split[1];
                     continue;
                 }
@@ -48,7 +48,7 @@ namespace TQDB_Parser.DBRMeta
                 {
                     var split = line.Split(',');
                     if (split.Length != 3)
-                        LogException.LogAndThrowException(logger, new ParseException(filePath, i + 1, info: "FileDescription contains invalid character , !"), caller: typeof(DBRMetaParser));
+                        LogException.LogAndThrowException(logger, new ParseException(filePath, (i + 1).ToString(), info: "FileDescription contains invalid character , !"), caller: typeof(DBRMetaParser));
                     description = split[1];
                 }
             }

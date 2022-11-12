@@ -8,9 +8,9 @@ namespace TQDB_Parser
 {
     public class ParseException : Exception
     {
-        public ParseException(string filePath, int? lineNumber = null, string? info = null) : base(CreateMessage(filePath, lineNumber, info)) { }
+        public ParseException(string filePath, string? lineNumber = null, string? info = null) : base(CreateMessage(filePath, lineNumber, info)) { }
 
-        private static string CreateMessage(string filePath, int? lineNumber, string? info)
+        private static string CreateMessage(string filePath, string? lineNumber, string? info)
         {
             var messageBuilder = new StringBuilder();
             messageBuilder.Append($"Failed to parse File {filePath}");

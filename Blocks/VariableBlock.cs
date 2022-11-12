@@ -10,7 +10,7 @@ namespace TQDB_Parser.Blocks
 {
     public class VariableBlock : Block
     {
-        public VariableBlock(string fileName, int lineIndex, IReadOnlyDictionary<string, string> keyValuePairs, IReadOnlyList<Block> innerBlocks, ILogger? logger = null)
+        public VariableBlock(string fileName, string lineIndex, IReadOnlyDictionary<string, string> keyValuePairs, IReadOnlyList<Block> innerBlocks, ILogger? logger = null)
             : base(fileName, lineIndex, keyValuePairs, innerBlocks, logger)
         {
             if (!KeyValuePairs.TryGetValue("class", out var @class))
