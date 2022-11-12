@@ -18,7 +18,7 @@ namespace TQDB_Parser.Blocks
         protected IReadOnlyList<VariableBlock> variableBlocks;
         protected IReadOnlyList<VariableBlock> recursedVariableBlocks;
 
-        public GroupBlock(string fileName, int lineIndex, IReadOnlyDictionary<string, string> keyValuePairs, IReadOnlyList<Block> innerBlocks, ILogger? logger = null)
+        public GroupBlock(string fileName, string lineIndex, IReadOnlyDictionary<string, string> keyValuePairs, IReadOnlyList<Block> innerBlocks, ILogger? logger = null)
             : base(fileName, lineIndex, keyValuePairs, innerBlocks, logger)
         {
             if (!KeyValuePairs.TryGetValue("type", out var type))
@@ -69,6 +69,15 @@ namespace TQDB_Parser.Blocks
             includeBlocks.Clear();
 
             UpdateFilteredBlocks();
+        }
+
+        public bool AreIncludesResolved(bool recurse = false)
+        {
+            bool ret = includeBlocks.Count == 0;
+            if (recurse)
+                ret &= recursedGroupBlocks.All(x => x.AreIncludesResolved(recurse));
+
+            return ret;
         }
 
         private void UpdateFilteredBlocks()

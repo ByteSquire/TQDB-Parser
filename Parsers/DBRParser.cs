@@ -36,6 +36,8 @@ namespace TQDB_Parser
             try
             {
                 var templateRoot = manager.GetRoot(templateName);
+                if (!templateRoot.AreIncludesResolved(true))
+                    manager.ResolveIncludes(templateRoot);
                 return new DBRFile(path, templateRoot, ParseEntries(filePath, templateRoot, rawEntries));
             }
             catch (Exception exc)
