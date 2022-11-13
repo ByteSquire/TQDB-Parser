@@ -133,7 +133,7 @@ namespace TQDB_Parser
 
         //}
 
-        private IReadOnlyDictionary<string, DBREntry> ParseEntries(string filePath, GroupBlock templateRoot, IReadOnlyDictionary<string, string> rawEntries)
+        public IReadOnlyDictionary<string, DBREntry> ParseEntries(string filePath, GroupBlock templateRoot, IReadOnlyDictionary<string, string> rawEntries)
         {
             var validVariables = templateRoot.GetVariables(true);
 
