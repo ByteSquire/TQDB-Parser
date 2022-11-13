@@ -15,6 +15,13 @@ namespace TQDB_Parser
         private readonly Dictionary<string, GroupBlock> templateRootsByPath;
         private readonly ILogger? logger;
 
+        private readonly string[] templatePathFixes = new string[]
+        {
+            "Custommaps\\Art_TQX3\\",
+            "Custommaps\\Art_TQX4\\",
+            "%TEMPLATE_DIR%"
+        };
+
         public string TemplateBaseDir { get; private set; }
 
         public bool UseParallel { get; private set; }
@@ -28,21 +35,6 @@ namespace TQDB_Parser
             TemplateBaseDir = baseDir;
             templateRootsByPath = new();
         }
-
-        //private IReadOnlyList<Block> GetInnerBlocks(string templatePath)
-        //{
-        //    if (!File.Exists(Path.Combine(templateBaseDir, templatePath)))
-        //        throw new FileNotFoundException($"The given template file {templatePath} could not be found!");
-
-        //    GroupBlock? root;
-        //    if ((root = GetRoot(templatePath)) is null)
-        //    {
-        //        root = new TemplateParser(templateBaseDir).ParseFile(templatePath);
-        //        templateRootsByPath.Add(templatePath, root);
-        //    }
-        //    root = ResolveIncludes(root);
-        //    return root.InnerBlocks;
-        //}
 
         public void ResolveIncludes(GroupBlock root)
         {
@@ -68,13 +60,12 @@ namespace TQDB_Parser
 
         private void FixTemplateName(ref string templateName)
         {
-            // hack to be able to parse templates that someone saved with their path
-            if (templateName.StartsWith("Custommaps\\Art_TQX3\\") && !Directory.Exists(Path.Combine(TemplateBaseDir, "Custommaps\\Art_TQX3")))
-                templateName = templateName["Custommaps\\Art_TQX3\\".Length..];
-
-            // including hack to ignore %TEMPLATE_DIR%, don't know how that is resolved (probably env variable)
-            if (templateName.StartsWith("%TEMPLATE_DIR%"))
-                templateName = templateName["%TEMPLATE_DIR%".Length..];
+            // workaround to be able to parse templates that someone saved with their path
+            foreach (var pathFix in templatePathFixes)
+            {
+                if (templateName.StartsWith(pathFix) && !Directory.Exists(Path.Combine(TemplateBaseDir, pathFix)))
+                    templateName = templateName[pathFix.Length..];
+            }
         }
 
         public GroupBlock GetRoot(string templateName)
