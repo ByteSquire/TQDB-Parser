@@ -21,7 +21,10 @@ namespace TQDB_Parser.Extensions
             if (!(s == "0" || s == "1"))
                 return false;
 
-            return int.TryParse(s, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out var b) && b != 0;
+            bool valid;
+            if (valid = TryParseTQString(s, out int result2))
+                result = result2 != 0;
+            return valid;
         }
 
         public static bool TryParseTQString(string? s, out float result)
