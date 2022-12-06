@@ -18,7 +18,7 @@ namespace TQDB_Parser.Extensions
             result = false;
             if (s is null)
                 return false;
-            if (s != "0" || s != "1")
+            if (!(s == "0" || s == "1"))
                 return false;
 
             return int.TryParse(s, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out var b) && b != 0;
