@@ -24,32 +24,11 @@ namespace TQDB_Parser.DBR
 
         public IReadOnlyList<DBREntry> Entries => entries.Values.ToList();
 
-        //public DBRFile(string path, TemplateManager manager)
-        //{
-        //    if (!File.Exists(path))
-        //        throw new FileNotFoundException($"The specified dbr file {path} could not be found!");
-
-        //    this.path = path;
-        //    entries = new();
-
-        //    var parser = new DBRParser(manager);
-
-        //    parser.ParseFile(path);
-        //}
-
         public DBRFile(string path, GroupBlock templateRoot, ILogger? logger = null)
-        {
-            this.path = path;
-            FileName = Path.GetFileName(path);
-            this.logger = logger;
-            TemplateRoot = templateRoot;
-            templateName = templateRoot.FileName;
-            entries = new();
+            : this(path, templateRoot, Array.Empty<KeyValuePair<string, DBREntry>>(), logger)
+        { }
 
-            GenerateDefaultEntries();
-        }
-
-        public DBRFile(string path, GroupBlock templateRoot, IReadOnlyDictionary<string, DBREntry> entries, ILogger? logger = null)
+        public DBRFile(string path, GroupBlock templateRoot, IEnumerable<KeyValuePair<string, DBREntry>> entries, ILogger? logger = null)
         {
             this.path = path;
             FileName = Path.GetFileName(path);
