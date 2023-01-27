@@ -42,36 +42,29 @@ namespace TQDB_Parser.Blocks
 
         public void ResolveIncludes(TemplateManager manager)
         {
-            if (!includeBlocks.Any())
-                return;
-
-            foreach (var includeBlockRef in includeBlocks)
+            if (!AreIncludesResolved())
             {
-                var includeBlock = manager.GetRoot(includeBlockRef.DefaultValue);
-                includeBlock.ResolveIncludes(manager);
-                // ignore header from included templates
-                var blocksToMerge = includeBlock.InnerBlocks.WhereType<GroupBlock>().Where(x => !(x.Name == "Header" && x.Type == GroupType.@system)).ToList();
-                //foreach (var inner in includeBlock.InnerBlocks.WhereType(x => (GroupBlock)x))
-                //    inner.ResolveIncludes(manager);
+                foreach (var includeBlockRef in includeBlocks)
+                {
+                    var includeBlock = manager.GetRoot(includeBlockRef.DefaultValue);
+                    includeBlock.ResolveIncludes(manager);
+                    // ignore header from included templates
+                    var blocksToMerge = includeBlock.InnerBlocks.WhereType<GroupBlock>().Where(x => !(x.Name == "Header" && x.Type == GroupType.@system)).ToList();
 
-                var blockToMerge = new GroupBlock(includeBlock.FileName,
-                    includeBlock.Line,
-                    includeBlock.KeyValuePairs,
-                    blocksToMerge,
-                    includeBlock.logger);
-                InnerBlocks = MergeBlocks(blockToMerge);
+                    var blockToMerge = new GroupBlock(includeBlock.FileName,
+                        includeBlock.Line,
+                        includeBlock.KeyValuePairs,
+                        blocksToMerge,
+                        includeBlock.logger);
+                    InnerBlocks = MergeBlocks(blockToMerge);
+                }
+                // Remove include blocks, they are now resolved
+                InnerBlocks = InnerBlocks.Except(includeBlocks).ToList();
+                includeBlocks.Clear();
             }
+            // Recursively resolve includes in child groups
             foreach (var inner in InnerBlocks.WhereType<GroupBlock>())
-            {
                 inner.ResolveIncludes(manager);
-                if (!inner.includeBlocks.Any())
-                    // do this explicitly because inner block has no includes
-                    inner.UpdateFilteredBlocks();
-            }
-
-            // Remove include blocks, they are now resolved
-            InnerBlocks = InnerBlocks.Except(includeBlocks).ToList();
-            includeBlocks.Clear();
 
             UpdateFilteredBlocks();
         }
