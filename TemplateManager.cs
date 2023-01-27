@@ -38,7 +38,7 @@ namespace TQDB_Parser
 
         public void ResolveIncludes(GroupBlock root)
         {
-            if (!root.AreIncludesResolved())
+            if (!root.AreIncludesResolved(true))
                 root.ResolveIncludes(this);
         }
 
