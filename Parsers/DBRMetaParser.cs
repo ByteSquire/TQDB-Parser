@@ -1,10 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.VisualBasic.FileIO;
 
 namespace TQDB_Parser.DBRMeta
 {
@@ -14,9 +9,9 @@ namespace TQDB_Parser.DBRMeta
 
         public string FileDescription { get; private set; }
 
-        public DBRMetadata(string templateName, string? fileDescription)
+        public DBRMetadata(string? templateName, string? fileDescription)
         {
-            TemplateName = templateName;
+            TemplateName = templateName ?? string.Empty;
             FileDescription = fileDescription ?? string.Empty;
         }
     }
@@ -27,33 +22,47 @@ namespace TQDB_Parser.DBRMeta
         {
             if (!File.Exists(filePath))
                 LogException.LogAndThrowException(logger, new FileNotFoundException($"The specified dbr file {filePath} could not be found!"), typeof(DBRMetaParser));
-            var lines = File.ReadAllLines(filePath);
 
             string? template = null;
             string? description = null;
-            for (var i = 0; i < lines.Length; i++)
+            using TextFieldParser parser = new(filePath)
             {
-                var line = lines[i];
-                if (template is not null && description is not null)
+                TextFieldType = FieldType.Delimited,
+            };
+            parser.SetDelimiters(",");
+            while (!parser.EndOfData)
+            {
+                if (template != null && description != null)
                     break;
-                if (line.StartsWith("templateName,"))
+                try
                 {
-                    var split = line.Split(',');
-                    if (split.Length != 3)
-                        LogException.LogAndThrowException(logger, new ParseException(filePath, (i + 1).ToString(), info: "templateName contains invalid character , !"), caller: typeof(DBRMetaParser));
-                    template = split[1];
+                    //Processing row
+                    string[] fields = parser.ReadFields()!;
+                    if (fields.Length != 3)
+                        throw new MalformedLineException("Expected to be 3 columns", parser.LineNumber);
+
+                    var key = fields[0];
+                    var value = fields[1];
+                    if (key.Equals("templateName"))
+                    {
+                        template = value;
+                        continue;
+                    }
+                    if (key.Equals("FileDescription"))
+                    {
+                        description = value;
+                    }
+                }
+                catch (MalformedLineException exc)
+                {
+                    var lineNumber = parser.ErrorLineNumber;
+                    var line = parser.ErrorLine;
+                    logger?.LogWarning("Warning, error parsing line {lineNumber} content: {line} in file {filePath}, reason:\n{message}", lineNumber, line, filePath, exc.Message);
                     continue;
                 }
-                if (line.StartsWith("FileDescription"))
-                {
-                    var split = line.Split(',');
-                    if (split.Length != 3)
-                        LogException.LogAndThrowException(logger, new ParseException(filePath, (i + 1).ToString(), info: "FileDescription contains invalid character , !"), caller: typeof(DBRMetaParser));
-                    description = split[1];
-                }
             }
-            if (string.IsNullOrWhiteSpace(template))
-                LogException.LogAndThrowException(logger, new ParseException(filePath, info: "missing templateName, this is a mandatory value!"), caller: typeof(DBRMetaParser));
+            //if (string.IsNullOrWhiteSpace(template))
+            //    LogException.LogAndThrowException(logger, new ParseException(filePath, info: "missing templateName, this is a mandatory value!"), caller: typeof(DBRMetaParser));
 
             return new DBRMetadata(template, description);
         }

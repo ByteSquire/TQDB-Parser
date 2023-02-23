@@ -107,31 +107,8 @@ namespace TQDB_Parser
                 LogException.LogAndThrowException(logger, new ParseException(filePath, info: $"the file is missing the required {Constants.TemplateKey} key"), this);
             ret.Remove(Constants.TemplateKey);
 
-            return (templateName, ret);
+            return (templateName!, ret);
         }
-
-        //private void ParseFile()
-        //{
-        //using var dbrFileReader = new StreamReader(path);
-        //var line = dbrFileReader.ReadLine();
-        //int lineIndex = 1;
-        //while (line is not null)
-        //{
-        //    var columns = line.Split(',');
-        //    if (columns.Length != 2)
-        //    {
-        //        Console.Error.WriteLine($"DBR-File {path} doesn't have two (non-empty) columns in line {lineIndex}?!");
-        //        continue;
-        //    }
-
-        //    var key = columns[0];
-        //    var valueString = columns[1];
-
-        //    rawEntries.Add(key, valueString);
-        //}
-
-
-        //}
 
         public IReadOnlyDictionary<string, DBREntry> ParseEntries(string filePath, GroupBlock templateRoot, IReadOnlyDictionary<string, string> rawEntries)
         {
