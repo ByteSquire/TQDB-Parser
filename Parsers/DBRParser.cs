@@ -79,11 +79,12 @@ namespace TQDB_Parser
             {
                 try
                 {
+                    var currLineNumber = parser.LineNumber;
                     //Processing row
                     string[] fields = parser.ReadFields()!;
                     if (fields.Length != 3)
                     {
-                        logger?.LogWarning("Warning, error parsing line {lineNumber} content: \"{line}\" in file {filePath}, reason:\nExpected to be 3 columns (separated by ,)", parser.LineNumber, string.Join(',', fields), filePath);
+                        logger?.LogWarning("Warning, error parsing line {lineNumber} content: \"{line}\" in file {filePath}, reason:\nExpected to be 3 columns (separated by ,)", currLineNumber, string.Join(',', fields), filePath);
                         continue;
                     }
 
@@ -95,7 +96,7 @@ namespace TQDB_Parser
                         continue;
 
                     if (!ret.TryAdd(key, value))
-                        logger?.LogWarning("File {filePath} in line {line}, variable {key} has already been defined", filePath, parser.LineNumber, key);
+                        logger?.LogWarning("File {filePath} in line {line}, variable {key} has already been defined", filePath, currLineNumber, key);
                 }
                 catch (MalformedLineException exc)
                 {
