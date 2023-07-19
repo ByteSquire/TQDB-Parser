@@ -36,10 +36,14 @@ namespace TQDB_Parser.DBRMeta
                     break;
                 try
                 {
+                    var currLineNumber = parser.LineNumber;
                     //Processing row
                     string[] fields = parser.ReadFields()!;
                     if (fields.Length != 3)
-                        throw new MalformedLineException("Expected to be 3 columns", parser.LineNumber);
+                    {
+                        logger?.LogWarning("Warning, error parsing line {lineNumber} content: \"{line}\" in file {filePath}, reason:\nExpected to be 3 columns (separated by ,)", currLineNumber, string.Join(',', fields), filePath);
+                        continue;
+                    }
 
                     var key = fields[0];
                     var value = fields[1];
@@ -57,7 +61,7 @@ namespace TQDB_Parser.DBRMeta
                 {
                     var lineNumber = parser.ErrorLineNumber;
                     var line = parser.ErrorLine;
-                    logger?.LogWarning("Warning, error parsing line {lineNumber} content: {line} in file {filePath}, reason:\n{message}", lineNumber, line, filePath, exc.Message);
+                    logger?.LogWarning("Warning, error parsing line {lineNumber} content: \"{line}\" in file {filePath}, reason:\n{message}", lineNumber, line, filePath, exc.Message);
                     continue;
                 }
             }
