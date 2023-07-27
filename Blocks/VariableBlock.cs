@@ -132,10 +132,11 @@ namespace TQDB_Parser.Blocks
                 for (int i = 0; i < values.Length; i++)
                 {
                     var element = values[i];
-                    if (!ValidateValueInternal(element, invalidIdx))
+                    var innerInvalidIdx = new List<int>();
+                    if (!ValidateValueInternal(element, innerInvalidIdx))
                     {
-                        // Maybe support having indices inside array elements, haven't see arrays of equations yet
-                        invalidIdx.Clear();
+                        // Maybe support having indices inside array elements, haven't seen arrays of equations yet
+                        //invalidIdx.AddRange(innerInvalidIdx);
                         logger?.LogWarning("The given value {element} at index {index} is invalid!", element, i);
                         invalidIdx.Add(i);
                     }
