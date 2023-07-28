@@ -98,7 +98,7 @@ namespace TQDB_Parser.DBR
 
         public void SaveFile(string? saveAs = null, Encoding? encoding = null)
         {
-            encoding ??= Encoding.UTF8;
+            encoding ??= new UTF8Encoding(false);
             File.WriteAllText(saveAs ?? path, ToString(), encoding);
         }
 
