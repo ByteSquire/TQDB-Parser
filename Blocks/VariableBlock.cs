@@ -113,7 +113,7 @@ namespace TQDB_Parser.Blocks
         public string GetDefaultValue()
         {
             if (Class == VariableClass.picklist)
-                return Value;
+                return DefaultValue;
             return string.IsNullOrEmpty(Value) ? DefaultValue : Value;
         }
 
