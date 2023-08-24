@@ -25,7 +25,7 @@ namespace TQDB_Parser.Blocks
             VariableType typeEnum = default;
             FileExtensions = Array.Empty<string>();
 
-            if (type.StartsWith("file_"))
+            if (type!.StartsWith("file_"))
             {
                 typeEnum = VariableType.file;
 

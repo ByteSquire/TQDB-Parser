@@ -38,7 +38,7 @@ namespace TQDB_Parser.Blocks
 
             if (!KeyValuePairs.TryGetValue("name", out var name))
                 LogException.LogAndThrowException(logger, new ParseException(fileName, lineIndex, $"{BlockName} Block is missing it's name field"), this);
-            Name = name;
+            Name = name!;
             //if (!KeyValuePairs.TryGetValue("type", out var type))
             //    throw new ParseException($"Failed to parse File {fileName}, the Block in line {lineIndex} is missing it's type field");
             //Type = type;
