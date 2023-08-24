@@ -26,6 +26,8 @@ namespace TQDB_Parser.DBR
             Value = value ?? template.GetDefaultValue();
             if (!(isValid = Template.ValidateValue(Value, out var indices)))
                 InvalidIndices = indices;
+            else
+                InvalidIndices = Array.Empty<int>();
         }
 
         public void UpdateValue(string value)
